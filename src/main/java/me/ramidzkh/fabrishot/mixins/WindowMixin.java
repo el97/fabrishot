@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 Ramid Khan
+ * Copyright (c) 2025 Ramid Khan
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,22 +24,33 @@
 
 package me.ramidzkh.fabrishot.mixins;
 
+import me.ramidzkh.fabrishot.Fabrishot;
+import me.ramidzkh.fabrishot.config.Config;
 import net.minecraft.client.util.Window;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Window.class)
-public interface WindowAccessor {
+public class WindowMixin {
 
-    @Accessor
-    void setWidth(int width);
+    @Inject(method = {"getWidth", "getScaledWidth"}, at = @At("RETURN"), cancellable = true)
+    private void scaleWidth(CallbackInfoReturnable<Integer> cir) {
+        if (Fabrishot.isInCapture()) {
+            cir.setReturnValue(Config.CAPTURE_WIDTH);
+        }
+    }
 
-    @Accessor
-    void setHeight(int height);
+    @Inject(method = {"getHeight", "getScaledHeight"}, at = @At("RETURN"), cancellable = true)
+    private void scaleHeight(CallbackInfoReturnable<Integer> cir) {
+        if (Fabrishot.isInCapture()) {
+            cir.setReturnValue(Config.CAPTURE_HEIGHT);
+        }
+    }
 
-    @Accessor
-    void setFramebufferWidth(int framebufferWidth);
-
-    @Accessor
-    void setFramebufferHeight(int framebufferHeight);
+    // todo: fix gui scaling (or is that needed anymore?)
+    //  @Inject(method = "getScaleFactor", at = @At("RETURN"), cancellable = true)
+    //  private void scaleScale(CallbackInfoReturnable<Double> cir) {
+    //  }
 }
